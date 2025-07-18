@@ -1,5 +1,4 @@
 use crate::behavior::cache;
-use crate::behavior::cache::FileTree;
 use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::error;
