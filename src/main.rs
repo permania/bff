@@ -4,6 +4,7 @@ mod config;
 mod parser;
 
 use alias_expansion::*;
+use behavior::*;
 use cli::*;
 use config::*;
 use parser::*;
@@ -53,13 +54,19 @@ fn main() {
             let count = obj
                 .count
                 .unwrap_or_else(|| if obj.all { u32::MAX } else { 1 });
-            match behavior::search::search(expd, obj.strict, count) {
+            match search::search(expd, obj.strict, count) {
                 Ok(ss) => {
                     for s in ss {
                         println!("{s}");
                     }
                 }
                 Err(e) => handle_error(e),
+            }
+        }
+
+        arg_parser::BFFCommands::Clean => {
+            if let Err(e) = cache::clean() {
+                handle_error(e)
             }
         }
 

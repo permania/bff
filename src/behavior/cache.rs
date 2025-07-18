@@ -2,12 +2,12 @@ use log::info;
 use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
 use std::{
-    fs::File,
+    fs::{self, File},
     io::{BufRead, BufReader, Read, Write},
 };
 use walkdir::WalkDir;
 
-use crate::cli::error;
+use crate::{cli::error, config::config};
 
 pub const CACHE_FILE: &str = ".cache.bff";
 
@@ -67,4 +67,20 @@ pub fn get_file_tree() -> Result<FileTree, error::BFFError> {
     });
 
     res
+}
+
+pub fn clean() -> Result<(), error::BFFError> {
+    info!("cleaning files");
+
+    if fs::exists(CACHE_FILE)? {
+        info!("cleaning cache file");
+        fs::remove_file(CACHE_FILE)?;
+    }
+
+    if fs::exists(config::CONFIG_FILE)? {
+        info!("cleaning config file");
+        fs::remove_file(config::CONFIG_FILE)?;
+    }
+
+    Ok(())
 }
