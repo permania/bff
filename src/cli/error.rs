@@ -16,6 +16,12 @@ pub enum BFFError {
     #[error("Error deserializing from TOML: {0}")]
     TOMLDeError(#[from] toml::de::Error),
 
+    #[error("Error serializing to msgpack: {0}")]
+    RMPEncodeError(#[from] rmp_serde::encode::Error),
+
+    #[error("Error deserializing from msgpack: {0}")]
+    RMPDecodeError(#[from] rmp_serde::decode::Error),
+
     #[error("Wrong number of arguments: {0}")]
     ArgumentCount(u32),
 

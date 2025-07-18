@@ -1,8 +1,9 @@
 use crate::behavior::cache;
+use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::error;
 use itertools::Itertools;
-use log::info;
+use log::{error, info};
 
 pub fn search(
     query: Vec<String>,
@@ -19,25 +20,36 @@ pub fn search(
         return Err(error::BFFError::ArgumentCount(0));
     }
 
-    let tree = cache::get_file_tree()?;
+    let tree = match cache::read_cache_file() {
+        Ok(t) => t,
+        Err(_) => {
+            info!("no cache found");
+            cache::get_file_tree()?
+        }
+    };
+
+    let sum = checksum::gen_checksum()?;
+    let old = checksum::read_checksum()?;
+
+    if !checksum::check_checksum(&sum, &old) {
+        info!("file tree changed, writing cache file");
+        cache::write_cache_file(sum, &tree)?;
+    }
+
     let mut res: Vec<String> = vec![];
     let mut full_match = false;
 
     for n in (0..=query.len()).rev() {
-        for leaf in &tree {
+        for leaf in &tree.files {
             let match_size = largest_matching_subset_size(leaf, &query)?;
             info!(
                 "checking file: {}, {} matches, n value of {}",
                 leaf, match_size, n
             );
 
-            if match_size == n {
+            if match_size == n && n > 0 {
                 if strict && n == query.len() {
                     full_match = true;
-                }
-
-                if res.len() == count as usize {
-                    return Ok(res);
                 }
 
                 // Skip partial matches
@@ -48,6 +60,10 @@ pub fn search(
                 info!("found file: {}, {} matches", leaf, n);
 
                 res.push(strings::highlight_substr_plural(leaf, &query));
+
+                if res.len() == count as usize {
+                    return Ok(res);
+                }
             }
         }
     }

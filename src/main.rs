@@ -9,7 +9,7 @@ use config::*;
 use parser::*;
 
 use clap::Parser;
-use log::{LevelFilter, info, warn};
+use log::{info, warn, LevelFilter};
 use scopeguard::*;
 
 use crate::cli::error::handle_error;
@@ -43,11 +43,6 @@ fn main() {
 
     match args.cmd {
         arg_parser::BFFCommands::Search(obj) => {
-            match behavior::checksum::gen_checksum() {
-                Ok(sum) => println!("{sum}"),
-                Err(e) => handle_error(e),
-            }
-
             info!("searching for files");
 
             let expd = obj.terms.expand(&conf);
