@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-pub const CONFIG_NAME: &str = ".bff.toml";
+pub const CONFIG_FILE: &str = ".bff.toml";
 
 #[derive(Debug, Deserialize)]
 pub struct TreeConfig {
