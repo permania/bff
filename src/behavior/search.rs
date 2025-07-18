@@ -1,4 +1,5 @@
 use crate::behavior::cache;
+use crate::behavior::cache::FileTree;
 use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::error;
@@ -20,21 +21,19 @@ pub fn search(
         return Err(error::BFFError::ArgumentCount(0));
     }
 
-    let tree = match cache::read_cache_file() {
-        Ok(t) => t,
-        Err(_) => {
-            info!("no cache found");
-            cache::get_file_tree()?
-        }
-    };
+    let mut tree: FileTree;
 
     let sum = checksum::gen_checksum()?;
     let old = checksum::read_checksum()?;
 
     if !checksum::check_checksum(&sum, &old) {
+        info!("cache is out of date");
+        tree = cache::get_file_tree()?;
         info!("file tree changed, writing cache file");
-        cache::write_cache_file(sum, &tree)?;
-    }
+        cache::write_cache_file(&sum, &tree)?;
+    } else {
+        tree = cache::read_cache_file()?;
+    };
 
     let mut res: Vec<String> = vec![];
     let mut full_match = false;
