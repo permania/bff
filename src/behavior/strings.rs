@@ -3,32 +3,6 @@ use colored::Colorize;
 use log::info;
 use std::cmp::max;
 
-pub fn contains_count(test: &str, query: &Vec<String>) -> Result<u32, error::BFFError> {
-    let count = query.into_iter().filter(|q| test.contains(*q)).count() as u32;
-
-    Ok(count)
-}
-
-pub fn contains_count_check(
-    test: &str,
-    query: &Vec<String>,
-    target_count: u32,
-) -> Result<bool, error::BFFError> {
-    info!(
-        "checking if string \"{}\" contains any of {:?} at least {} times",
-        test, query, target_count
-    );
-
-    let count = contains_count(test, query)?;
-    if count >= target_count {
-        info!("string contains pattern");
-        Ok(true)
-    } else {
-        info!("string does contains pattern");
-        Ok(false)
-    }
-}
-
 pub fn find_pattern_indices(full_string: &str, substrs: &Vec<String>) -> Vec<(usize, usize)> {
     if substrs.is_empty() {
         return vec![];
@@ -80,7 +54,7 @@ pub fn highlight_substr_plural(s: &str, substrs: &Vec<String>) -> String {
             result.push_str(&s[last..start]);
         }
 
-        result.push_str(&s[start..end].bright_blue().bold().to_string());
+        result.push_str(&s[start..end].yellow().bold().to_string());
         last = end;
     }
 
@@ -89,21 +63,4 @@ pub fn highlight_substr_plural(s: &str, substrs: &Vec<String>) -> String {
     }
 
     result
-}
-
-pub fn count_occurrences(haystack: &str, needlestack: &Vec<String>) -> usize {
-    info!(
-        "counting occurences of {:?} in string: \"{}\"",
-        needlestack, haystack
-    );
-
-    let mut res: usize = 0;
-
-    for needle in needlestack {
-        res = haystack.match_indices(needle).count();
-    }
-
-    info!("string contains {} occurences of pattern", res);
-
-    return res;
 }
