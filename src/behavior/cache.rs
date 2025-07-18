@@ -16,7 +16,7 @@ pub struct FileTree {
     pub files: Box<[String]>,
 }
 
-pub fn write_cache_file(checksum: String, file_tree: &FileTree) -> Result<(), error::BFFError> {
+pub fn write_cache_file(checksum: &str, file_tree: &FileTree) -> Result<(), error::BFFError> {
     info!("writing to cache file");
 
     let mut file = File::create(CACHE_FILE)?;
