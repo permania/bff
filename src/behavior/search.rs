@@ -4,7 +4,7 @@ use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::error;
 use itertools::Itertools;
-use log::{error, info};
+use log::info;
 
 pub fn search(
     query: Vec<String>,
@@ -13,32 +13,33 @@ pub fn search(
 ) -> Result<Vec<String>, error::BFFError> {
     info!(
         "begin {} search with terms {:?}",
-        if strict == true { "strict" } else { "soft" },
+        if strict { "strict" } else { "soft" },
         query
     );
+
+    let qlen = query.len();
 
     if query.is_empty() {
         return Err(error::BFFError::ArgumentCount(0));
     }
 
-    let mut tree: FileTree;
-
     let sum = checksum::gen_checksum()?;
     let old = checksum::read_checksum()?;
 
-    if !checksum::check_checksum(&sum, &old) {
+    let tree = if !checksum::check_checksum(&sum, &old) {
         info!("cache is out of date");
-        tree = cache::get_file_tree()?;
+        let tree = cache::get_file_tree()?;
         info!("file tree changed, writing cache file");
         cache::write_cache_file(&sum, &tree)?;
+        tree
     } else {
-        tree = cache::read_cache_file()?;
+        cache::read_cache_file()?
     };
 
     let mut res: Vec<String> = vec![];
     let mut full_match = false;
 
-    for n in (0..=query.len()).rev() {
+    for n in (0..=qlen).rev() {
         for leaf in &tree.files {
             let match_size = largest_matching_subset_size(leaf, &query)?;
             info!(
@@ -47,12 +48,12 @@ pub fn search(
             );
 
             if match_size == n && n > 0 {
-                if strict && n == query.len() {
+                if strict && n == qlen {
                     full_match = true;
                 }
 
                 // Skip partial matches
-                if strict && n != query.len() {
+                if strict && n != qlen {
                     continue;
                 }
 
