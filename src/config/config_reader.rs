@@ -1,7 +1,7 @@
 use std::fs;
 
+use crate::cli::error::BFFError;
 use crate::config::config;
-use crate::error::BFFError;
 
 pub fn read_config() -> Result<config::TreeConfig, BFFError> {
     if !fs::exists(config::CONFIG_FILE)? {

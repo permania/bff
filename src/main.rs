@@ -10,7 +10,7 @@ use config::*;
 use parser::*;
 
 use clap::Parser;
-use log::{info, warn, LevelFilter};
+use log::{LevelFilter, info, warn};
 use scopeguard::*;
 
 use crate::cli::error::handle_error;
