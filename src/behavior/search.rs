@@ -78,6 +78,61 @@ pub fn search(
     }
 }
 
+pub fn search_in_tree(
+    tree: &cache::FileTree,
+    query: Vec<String>,
+    strict: bool,
+    count: u32,
+) -> Result<Vec<String>, error::BFFError> {
+    let qlen = query.len();
+
+    if query.is_empty() {
+        return Err(error::BFFError::ArgumentCount(0));
+    }
+
+    let mut res: Vec<String> = vec![];
+    let mut full_match = false;
+
+    for n in (0..=qlen).rev() {
+        for leaf in &tree.files {
+            let match_size = largest_matching_subset_size(leaf, &query)?;
+            info!(
+                "checking file: {}, {} matches, n value of {}",
+                leaf, match_size, n
+            );
+
+            if match_size == n && n > 0 {
+                if strict && n == qlen {
+                    full_match = true;
+                }
+
+                // Skip partial matches
+                if strict && n != qlen {
+                    continue;
+                }
+
+                info!("found file: {}, {} matches", leaf, n);
+
+                res.push(strings::highlight_substr_plural(leaf, &query));
+
+                if res.len() == count as usize {
+                    return Ok(res);
+                }
+            }
+        }
+    }
+
+    if strict && !full_match {
+        return Err(error::BFFError::NoResult);
+    }
+
+    if res.is_empty() {
+        Err(error::BFFError::NoResult)
+    } else {
+        Ok(res)
+    }
+}
+
 pub fn largest_matching_subset_size(
     test: &str,
     query: &Vec<String>,
