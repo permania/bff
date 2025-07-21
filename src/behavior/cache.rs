@@ -7,7 +7,7 @@ use std::{
 };
 use walkdir::WalkDir;
 
-use crate::{cli::error, config::config};
+use crate::{cli::error, config::schema};
 
 pub const CACHE_FILE: &str = ".cache.bff";
 
@@ -20,7 +20,7 @@ pub fn write_cache_file(checksum: &str, file_tree: &FileTree) -> Result<(), erro
     info!("writing to cache file");
 
     let mut file = File::create(CACHE_FILE)?;
-    writeln!(file, "{}\n-", checksum)?;
+    writeln!(file, "{checksum}\n-")?;
 
     let buf = encode::to_vec(&file_tree)?;
     file.write_all(&buf)?;
@@ -50,23 +50,21 @@ pub fn read_cache_file() -> Result<FileTree, error::BFFError> {
 pub fn get_file_tree() -> Result<FileTree, error::BFFError> {
     info!("building file tree");
 
-    let res = Ok(FileTree {
+    Ok(FileTree {
         files: WalkDir::new(".")
             .into_iter()
             .filter_map(|entry| {
                 let entry = entry.ok()?;
                 if entry.file_type().is_file() {
                     let displayed = entry.path().display().to_string();
-                    info!("adding path to file tree: {}", displayed);
+                    info!("adding path to file tree: {displayed}");
                     Some(displayed)
                 } else {
                     None
                 }
             })
             .collect::<Box<[String]>>(),
-    });
-
-    res
+    })
 }
 
 pub fn clean() -> Result<(), error::BFFError> {
@@ -77,9 +75,9 @@ pub fn clean() -> Result<(), error::BFFError> {
         fs::remove_file(CACHE_FILE)?;
     }
 
-    if fs::exists(config::CONFIG_FILE)? {
+    if fs::exists(schema::CONFIG_FILE)? {
         info!("cleaning config file");
-        fs::remove_file(config::CONFIG_FILE)?;
+        fs::remove_file(schema::CONFIG_FILE)?;
     }
 
     Ok(())

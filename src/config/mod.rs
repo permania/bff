@@ -1,2 +1,2 @@
-pub mod config;
+pub mod schema;
 pub mod config_reader;

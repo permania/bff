@@ -33,14 +33,14 @@ fn main() {
         Ok(c) => c,
         Err(cli::error::BFFError::NoConfig) => {
             warn!("no config found!");
-            config::config::TreeConfig::default()
+            config::schema::TreeConfig::default()
         }
         Err(e) => {
             cli::error::handle_error(e);
         }
     };
 
-    info!("using config: {:?}", conf);
+    info!("using config: {conf:?}");
 
     match args.cmd {
         arg_parser::BFFCommands::Search(obj) => {
@@ -49,11 +49,11 @@ fn main() {
             let expd = obj.terms.expand(&conf);
 
             info!("before alias expansion: {:?}", obj.terms);
-            info!("after alias expansion: {:?}", expd);
+            info!("after alias expansion: {expd:?}");
 
             let count = obj
                 .count
-                .unwrap_or_else(|| if obj.all { u32::MAX } else { 1 });
+                .unwrap_or(if obj.all { u32::MAX } else { 1 });
             match search::search(expd, obj.strict, count) {
                 Ok(ss) => {
                     for s in ss {

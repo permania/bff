@@ -1,4 +1,3 @@
-use crate::cli::error;
 use colored::Colorize;
 use log::info;
 use std::cmp::max;
@@ -42,7 +41,7 @@ fn sort_and_merge(mut ranges: Vec<(usize, usize)>) -> Vec<(usize, usize)> {
 }
 
 pub fn highlight_substr_plural(s: &str, substrs: &Vec<String>) -> String {
-    info!("highlighting patterns: {:?}, in string: \"{}\"", substrs, s);
+    info!("highlighting patterns: {substrs:?}, in string: \"{s}\"");
 
     let ranges = find_pattern_indices(s, substrs);
 

@@ -36,7 +36,7 @@ pub fn handle_error(e: BFFError) -> ! {
         .and_then(|io_err| io_err.raw_os_error())
         .unwrap_or(1);
 
-    error!("{}", e);
+    error!("{e}");
 
     process::exit(code);
 }

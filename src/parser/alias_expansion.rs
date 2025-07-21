@@ -1,4 +1,4 @@
-use crate::config::config::TreeConfig;
+use crate::config::schema::TreeConfig;
 
 pub trait ExpandAlias {
     fn expand(&self, conf: &TreeConfig) -> Self;

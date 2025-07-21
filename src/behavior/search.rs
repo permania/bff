@@ -41,10 +41,7 @@ pub fn search(
     for n in (0..=qlen).rev() {
         for leaf in &tree.files {
             let match_size = largest_matching_subset_size(leaf, &query)?;
-            info!(
-                "checking file: {}, {} matches, n value of {}",
-                leaf, match_size, n
-            );
+            info!("checking file: {leaf}, {match_size} matches, n value of {n}");
 
             if match_size == n && n > 0 {
                 if strict && n == qlen {
@@ -56,7 +53,7 @@ pub fn search(
                     continue;
                 }
 
-                info!("found file: {}, {} matches", leaf, n);
+                info!("found file: {leaf}, {n} matches");
 
                 res.push(strings::highlight_substr_plural(leaf, &query));
 
@@ -78,6 +75,7 @@ pub fn search(
     }
 }
 
+#[allow(dead_code)]
 pub fn search_in_tree(
     tree: &cache::FileTree,
     query: Vec<String>,
@@ -96,10 +94,7 @@ pub fn search_in_tree(
     for n in (0..=qlen).rev() {
         for leaf in &tree.files {
             let match_size = largest_matching_subset_size(leaf, &query)?;
-            info!(
-                "checking file: {}, {} matches, n value of {}",
-                leaf, match_size, n
-            );
+            info!("checking file: {leaf}, {match_size} matches, n value of {n}");
 
             if match_size == n && n > 0 {
                 if strict && n == qlen {
@@ -111,7 +106,7 @@ pub fn search_in_tree(
                     continue;
                 }
 
-                info!("found file: {}, {} matches", leaf, n);
+                info!("found file: {leaf}, {n} matches");
 
                 res.push(strings::highlight_substr_plural(leaf, &query));
 
@@ -135,7 +130,7 @@ pub fn search_in_tree(
 
 pub fn largest_matching_subset_size(
     test: &str,
-    query: &Vec<String>,
+    query: &[String],
 ) -> Result<usize, error::BFFError> {
     for size in (1..=query.len()).rev() {
         for subset in query.iter().combinations(size) {

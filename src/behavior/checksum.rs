@@ -5,7 +5,6 @@ use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::behavior::cache;
 use crate::cli::error;
 
 use super::cache::CACHE_FILE;
@@ -18,7 +17,7 @@ pub fn gen_checksum() -> Result<String, error::BFFError> {
     let metadata = std::fs::metadata(".")?;
     let modified = metadata.modified()?;
 
-    let hash = Sha256::digest(system_time_as_bytes(modified).unwrap_or(vec![]));
+    let hash = Sha256::digest(system_time_as_bytes(modified).unwrap_or_default());
     let hex_string = hex::encode(hash);
 
     if hex_string == EMPTY_HASH {

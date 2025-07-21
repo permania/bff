@@ -1,7 +1,7 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, builder::{Styles, styling::AnsiColor}};
 
 #[derive(Debug, Parser)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, styles=STYLES)]
 pub struct BFFArgs {
     /// The command to use
     #[clap(subcommand)]
@@ -40,3 +40,9 @@ pub struct SearchArgs {
     #[clap(short, long)]
     pub all: bool,
 }
+
+const STYLES: Styles = Styles::styled()
+    .header(AnsiColor::Yellow.on_default())
+    .usage(AnsiColor::Yellow.on_default())
+    .literal(AnsiColor::BrightCyan.on_default())
+    .placeholder(AnsiColor::BrightWhite.on_default());
