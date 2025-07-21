@@ -6,6 +6,7 @@ license = "MIT"
 edition = "2024"
 
 [dependencies]
+ascii_tree = "0.1.1"
 clap = { version = "4.5.41", features = ["derive"] }
 colored = "3.0.0"
 env_logger = "0.11.8"
