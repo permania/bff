@@ -3,7 +3,7 @@ mod cli;
 mod config;
 mod parser;
 
-use behavior::{cache::clean, search::search, tree::path_to_tree};
+use behavior::{cache::clean, search::run_search, tree::path_to_tree};
 use clap::Parser;
 use cli::error::BFFError;
 use cli::{
@@ -17,7 +17,6 @@ use config::{config_reader::read_config, schema::TreeConfig};
 use env_logger::Builder;
 use log::{info, warn, LevelFilter};
 use main_error::MainError;
-use parser::alias_expansion::ExpandAlias;
 
 fn run() -> Result<(), BFFError> {
     let args = BFFArgs::parse();
@@ -45,20 +44,7 @@ fn run() -> Result<(), BFFError> {
     info!("using config: {conf:?}");
 
     match args.cmd {
-        Search(obj) => {
-            info!("searching for files");
-
-            let expd = obj.terms.expand(&conf);
-
-            info!("before alias expansion: {:?}", obj.terms);
-            info!("after alias expansion: {expd:?}");
-
-            let count = obj.count.unwrap_or(if obj.all { u32::MAX } else { 1 });
-            let ss = search(expd, obj.strict, count)?;
-            for s in ss {
-                println!("{s}");
-            }
-        }
+        Search(obj) => run_search(obj, conf)?,
 
         Clean => clean()?,
 

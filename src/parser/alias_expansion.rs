@@ -1,7 +1,7 @@
 use crate::config::schema::TreeConfig;
 
 pub trait ExpandAlias {
-    fn expand(&self, conf: &TreeConfig) -> Self;
+    fn expand(&self, conf: TreeConfig) -> Self;
 }
 
 impl ExpandAlias for Vec<String> {
@@ -9,7 +9,7 @@ impl ExpandAlias for Vec<String> {
     ///
     /// If a string matches a key in `.bff.toml (TreeConfig.alias)`, it is replaced by the mapped value.
     /// Otherwise, it remains unchanged.
-    fn expand(&self, conf: &TreeConfig) -> Self {
+    fn expand(&self, conf: TreeConfig) -> Self {
         let aliases = &conf.alias;
 
         let expanded: Vec<String> = self

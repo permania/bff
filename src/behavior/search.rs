@@ -4,7 +4,10 @@ use log::info;
 use crate::behavior::cache;
 use crate::behavior::checksum;
 use crate::behavior::strings;
+use crate::cli::arg_parser::SearchArgs;
 use crate::cli::error::BFFError::{self, ArgumentCount, NoResult};
+use crate::config::schema::TreeConfig;
+use crate::parser::alias_expansion::ExpandAlias;
 
 pub fn search(query: Vec<String>, strict: bool, count: u32) -> Result<Vec<String>, BFFError> {
     info!(
@@ -135,4 +138,21 @@ pub fn largest_matching_subset_size(test: &str, query: &[String]) -> Result<usiz
     }
 
     Ok(0)
+}
+
+pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
+    info!("searching for files");
+
+    let expd = obj.terms.expand(conf);
+
+    info!("before alias expansion: {:?}", obj.terms);
+    info!("after alias expansion: {expd:?}");
+
+    let count = obj.count.unwrap_or(if obj.all { u32::MAX } else { 1 });
+    let ss = search(expd, obj.strict, count)?;
+    for s in ss {
+        println!("{s}");
+    }
+
+    Ok(())
 }
