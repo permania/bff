@@ -1,6 +1,7 @@
+use std::cmp::max;
+
 use colored::Colorize;
 use log::info;
-use std::cmp::max;
 
 pub fn find_pattern_indices(full_string: &str, substrs: &Vec<String>) -> Vec<(usize, usize)> {
     if substrs.is_empty() {

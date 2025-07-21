@@ -1,5 +1,5 @@
 use bff::behavior::cache::FileTree;
-use bff::behavior::search::{self, search_in_tree};
+use bff::behavior::search::search_in_tree;
 
 #[test]
 fn strict_search_test() {

@@ -1,4 +1,7 @@
-use clap::{Parser, Subcommand, builder::{Styles, styling::AnsiColor}};
+use clap::{
+    builder::{styling::AnsiColor, Styles},
+    Parser, Subcommand,
+};
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None, styles=STYLES)]

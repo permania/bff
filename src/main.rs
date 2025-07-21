@@ -3,47 +3,47 @@ mod cli;
 mod config;
 mod parser;
 
-use alias_expansion::*;
-use behavior::*;
-use cli::*;
-use config::*;
-use parser::*;
-
+use behavior::{cache::clean, search::search};
 use clap::Parser;
-use log::{LevelFilter, info, warn};
-use scopeguard::*;
-
-use crate::cli::error::handle_error;
+use cli::{
+    arg_parser::{BFFArgs, BFFCommands::*},
+    error::{handle_error, BFFError::*},
+};
+use config::{config_reader::read_config, schema::TreeConfig};
+use env_logger::Builder;
+use log::{info, warn, LevelFilter};
+use parser::alias_expansion::ExpandAlias;
+use scopeguard::defer;
 
 fn main() {
     defer! { info!("end execution successfully") }
 
-    let args = cli::arg_parser::BFFArgs::parse();
+    let args = BFFArgs::parse();
 
     let level = if args.verbose {
         LevelFilter::Info
     } else {
         LevelFilter::Error
     };
-    env_logger::Builder::new().filter_level(level).init();
+    Builder::new().filter_level(level).init();
 
     info!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
-    let conf = match config_reader::read_config() {
+    let conf = match read_config() {
         Ok(c) => c,
-        Err(cli::error::BFFError::NoConfig) => {
+        Err(NoConfig) => {
             warn!("no config found!");
-            config::schema::TreeConfig::default()
+            TreeConfig::default()
         }
         Err(e) => {
-            cli::error::handle_error(e);
+            handle_error(e);
         }
     };
 
     info!("using config: {conf:?}");
 
     match args.cmd {
-        arg_parser::BFFCommands::Search(obj) => {
+        Search(obj) => {
             info!("searching for files");
 
             let expd = obj.terms.expand(&conf);
@@ -51,10 +51,8 @@ fn main() {
             info!("before alias expansion: {:?}", obj.terms);
             info!("after alias expansion: {expd:?}");
 
-            let count = obj
-                .count
-                .unwrap_or(if obj.all { u32::MAX } else { 1 });
-            match search::search(expd, obj.strict, count) {
+            let count = obj.count.unwrap_or(if obj.all { u32::MAX } else { 1 });
+            match search(expd, obj.strict, count) {
                 Ok(ss) => {
                     for s in ss {
                         println!("{s}");
@@ -64,12 +62,12 @@ fn main() {
             }
         }
 
-        arg_parser::BFFCommands::Clean => {
-            if let Err(e) = cache::clean() {
+        Clean => {
+            if let Err(e) = clean() {
                 handle_error(e)
             }
         }
 
-        arg_parser::BFFCommands::Ui => todo!("implement ui"),
+        Ui => todo!("implement ui"),
     }
 }

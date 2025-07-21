@@ -1,10 +1,11 @@
-use log::info;
-use rmp_serde::{decode, encode};
-use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File},
     io::{BufRead, BufReader, Read, Write},
 };
+
+use log::info;
+use rmp_serde::{decode, encode};
+use serde::{Deserialize, Serialize};
 use walkdir::WalkDir;
 
 use crate::{cli::error, config::schema};

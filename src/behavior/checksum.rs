@@ -1,13 +1,13 @@
-use hex;
-use log::info;
-use sha2::{Digest, Sha256};
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::cli::error;
+use hex;
+use log::info;
+use sha2::{Digest, Sha256};
 
 use super::cache::CACHE_FILE;
+use crate::cli::error;
 
 const EMPTY_HASH: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 

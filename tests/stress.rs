@@ -7,7 +7,7 @@ use rand::Rng;
 fn stress_test_search_random_file() {
     let mut files = Vec::with_capacity(1_000_000);
     for i in 0..1_000_000 {
-        files.push(format!("file_{:07}.txt", i));
+        files.push(format!("file_{i:07}.txt"));
     }
 
     let mut rng = rand::thread_rng();
@@ -33,7 +33,7 @@ fn stress_test_search_random_file() {
             if let error::BFFError::NoResult = e {
                 panic!("Random file search returned no results unexpectedly");
             } else {
-                panic!("Search failed unexpectedly: {:?}", e);
+                panic!("Search failed unexpectedly: {e:?}");
             }
         }
     }

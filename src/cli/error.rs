@@ -1,5 +1,6 @@
-use log::error;
 use std::{error::Error, io, process};
+
+use log::error;
 use thiserror::Error;
 
 #[derive(Debug, Error)]

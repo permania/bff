@@ -1,9 +1,10 @@
+use itertools::Itertools;
+use log::info;
+
 use crate::behavior::cache;
 use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::error;
-use itertools::Itertools;
-use log::info;
 
 pub fn search(
     query: Vec<String>,
