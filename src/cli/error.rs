@@ -1,7 +1,9 @@
-use std::{error::Error, io, process};
+use std::{fmt, io};
 
 use log::error;
+use rmp_serde::{decode, encode};
 use thiserror::Error;
+use toml::de;
 
 #[derive(Debug, Error)]
 pub enum BFFError {
@@ -15,29 +17,23 @@ pub enum BFFError {
     NoResult,
 
     #[error("Error deserializing from TOML: {0}")]
-    TOMLDeError(#[from] toml::de::Error),
+    TOMLDeError(#[from] de::Error),
 
     #[error("Error serializing to msgpack: {0}")]
-    RMPEncodeError(#[from] rmp_serde::encode::Error),
+    RMPEncodeError(#[from] encode::Error),
 
     #[error("Error deserializing from msgpack: {0}")]
-    RMPDecodeError(#[from] rmp_serde::decode::Error),
+    RMPDecodeError(#[from] decode::Error),
 
     #[error("Wrong number of arguments: {0}")]
     ArgumentCount(u32),
 
     #[error("Unable to convert system time to bytes")]
     NoBytes,
-}
 
-pub fn handle_error(e: BFFError) -> ! {
-    let code = e
-        .source()
-        .and_then(|source| source.downcast_ref::<std::io::Error>())
-        .and_then(|io_err| io_err.raw_os_error())
-        .unwrap_or(1);
+    #[error("File path contains invalid UTF-8")]
+    NoUTF8,
 
-    error!("{e}");
-
-    process::exit(code);
+    #[error("Failure formatting: {0}")]
+    FormatError(#[from] fmt::Error),
 }

@@ -4,13 +4,9 @@ use log::info;
 use crate::behavior::cache;
 use crate::behavior::checksum;
 use crate::behavior::strings;
-use crate::cli::error;
+use crate::cli::error::BFFError::{self, ArgumentCount, NoResult};
 
-pub fn search(
-    query: Vec<String>,
-    strict: bool,
-    count: u32,
-) -> Result<Vec<String>, error::BFFError> {
+pub fn search(query: Vec<String>, strict: bool, count: u32) -> Result<Vec<String>, BFFError> {
     info!(
         "begin {} search with terms {:?}",
         if strict { "strict" } else { "soft" },
@@ -20,7 +16,7 @@ pub fn search(
     let qlen = query.len();
 
     if query.is_empty() {
-        return Err(error::BFFError::ArgumentCount(0));
+        return Err(ArgumentCount(0));
     }
 
     let sum = checksum::gen_checksum()?;
@@ -66,11 +62,11 @@ pub fn search(
     }
 
     if strict && !full_match {
-        return Err(error::BFFError::NoResult);
+        return Err(NoResult);
     }
 
     if res.is_empty() {
-        Err(error::BFFError::NoResult)
+        Err(NoResult)
     } else {
         Ok(res)
     }
@@ -82,11 +78,11 @@ pub fn search_in_tree(
     query: Vec<String>,
     strict: bool,
     count: u32,
-) -> Result<Vec<String>, error::BFFError> {
+) -> Result<Vec<String>, BFFError> {
     let qlen = query.len();
 
     if query.is_empty() {
-        return Err(error::BFFError::ArgumentCount(0));
+        return Err(ArgumentCount(0));
     }
 
     let mut res: Vec<String> = vec![];
@@ -119,20 +115,17 @@ pub fn search_in_tree(
     }
 
     if strict && !full_match {
-        return Err(error::BFFError::NoResult);
+        return Err(NoResult);
     }
 
     if res.is_empty() {
-        Err(error::BFFError::NoResult)
+        Err(NoResult)
     } else {
         Ok(res)
     }
 }
 
-pub fn largest_matching_subset_size(
-    test: &str,
-    query: &[String],
-) -> Result<usize, error::BFFError> {
+pub fn largest_matching_subset_size(test: &str, query: &[String]) -> Result<usize, BFFError> {
     for size in (1..=query.len()).rev() {
         for subset in query.iter().combinations(size) {
             if subset.iter().all(|q| test.contains(*q)) {
