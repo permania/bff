@@ -3,7 +3,7 @@ mod cli;
 mod config;
 mod parser;
 
-use behavior::{cache::clean, search::run_search, tree::path_to_tree};
+use behavior::{cache::clean, search::run_search};
 use clap::Parser;
 use cli::error::BFFError;
 use cli::{
@@ -48,15 +48,7 @@ fn run() -> Result<(), BFFError> {
 
         Clean => clean()?,
 
-        Ui => {
-            println!(
-                "{:?}",
-                path_to_tree(
-                    r"./incremental/strict-183ylcu1607np/s-h9etbuj4fx-1qoqa9l-2kzrhsgpwf5ey55i1hvdgz4wr/work-products.bin" // r"C:\Users\Alice\Desktop\example.txt"
-                                                                                                                           // r"./home/corn/.config/emacs/eln-cache/29.4-576e0a91/lsp-openscad-4f0d4fd1-23d4a5e7.eln"
-                )?
-            );
-        }
+        Ui => {}
     }
     Ok(())
 }

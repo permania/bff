@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use log::info;
 
+use super::tree::path_to_tree;
 use crate::behavior::cache;
 use crate::behavior::checksum;
 use crate::behavior::strings;
@@ -152,6 +153,9 @@ pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
     let ss = search(expd, obj.strict, count)?;
     for s in ss {
         println!("{s}");
+        if obj.tree {
+            println!("{}", path_to_tree(&s)?);
+        };
     }
 
     Ok(())

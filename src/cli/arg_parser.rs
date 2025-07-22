@@ -39,6 +39,10 @@ pub struct SearchArgs {
     #[clap(short, long)]
     pub count: Option<u32>,
 
+    /// Display a tree view of the resulting path
+    #[clap(short, long)]
+    pub tree: bool,
+
     /// Display all possible results (overridden by --count)
     #[clap(short, long)]
     pub all: bool,
