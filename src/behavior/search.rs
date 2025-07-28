@@ -77,7 +77,7 @@ pub fn search(query: Vec<String>, strict: bool, count: u32) -> Result<Vec<String
 }
 
 #[allow(dead_code)]
-pub fn search_in_tree(
+fn search_in_tree(
     tree: &cache::FileTree,
     query: Vec<String>,
     strict: bool,
@@ -162,7 +162,7 @@ pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
 }
 
 #[cfg(test)]
-mod search_tests {
+mod tests {
     use once_cell::sync::Lazy;
 
     use super::search_in_tree;
