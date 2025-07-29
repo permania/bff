@@ -3,16 +3,16 @@ use std::{
     io::{BufRead, BufReader, Read, Write},
 };
 
+use jwalk::WalkDir;
 use log::info;
 use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
-use walkdir::WalkDir;
 
 use crate::{cli::error, config::schema};
 
 pub const CACHE_FILE: &str = ".cache.bff";
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Default, Serialize, Deserialize, Debug)]
 pub struct FileTree {
     pub files: Box<[String]>,
 }
