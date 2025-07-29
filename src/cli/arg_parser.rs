@@ -21,8 +21,6 @@ pub enum BFFCommands {
     Search(SearchArgs),
     /// Delete hidden files used by bff
     Clean,
-    /// Find files using the TUI file browser
-    Ui,
 }
 
 #[derive(Debug, Parser)]
@@ -46,6 +44,14 @@ pub struct SearchArgs {
     /// Display all possible results (overridden by --count)
     #[clap(short, long)]
     pub all: bool,
+
+    /// Disable skipping hidden directories (can decrease indexing time drastically)
+    #[clap(short = 'S', long)]
+    pub skip: bool,
+
+    /// Skip writing the cache file, good for not cluttering directories
+    #[clap(short = 'C', long)]
+    pub no_cache: bool,
 }
 
 const STYLES: Styles = Styles::styled()

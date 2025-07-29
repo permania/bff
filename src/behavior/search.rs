@@ -3,6 +3,7 @@ use log::info;
 
 use super::tree::path_to_tree;
 use crate::behavior::cache;
+use crate::behavior::cache::write_cache_file;
 use crate::behavior::checksum;
 use crate::behavior::strings;
 use crate::cli::arg_parser::SearchArgs;
@@ -10,7 +11,13 @@ use crate::cli::error::BFFError::{self, ArgumentCount, NoResult};
 use crate::config::schema::TreeConfig;
 use crate::parser::alias_expansion::ExpandAlias;
 
-pub fn search(query: Vec<String>, strict: bool, count: u32) -> Result<Vec<String>, BFFError> {
+pub fn search(
+    query: Vec<String>,
+    strict: bool,
+    count: u32,
+    skip_hidden: bool,
+    skip_cache: bool,
+) -> Result<Vec<String>, BFFError> {
     info!(
         "begin {} search with terms {:?}",
         if strict { "strict" } else { "soft" },
@@ -28,9 +35,11 @@ pub fn search(query: Vec<String>, strict: bool, count: u32) -> Result<Vec<String
 
     let tree = if !checksum::check_checksum(&sum, &old) {
         info!("cache is out of date");
-        let tree = cache::get_file_tree()?;
+        let tree = cache::get_file_tree(skip_hidden)?;
         info!("file tree changed, writing cache file");
-        cache::write_cache_file(&sum, &tree)?;
+        if !skip_cache {
+            write_cache_file(&sum, &tree)?
+        };
         tree
     } else {
         cache::read_cache_file()?
@@ -141,7 +150,7 @@ pub fn largest_matching_subset_size(test: &str, query: &[String]) -> Result<usiz
     Ok(0)
 }
 
-pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
+pub fn run_search(obj: SearchArgs, conf: TreeConfig, skip_cache: bool) -> Result<(), BFFError> {
     info!("searching for files");
 
     let expd = obj.terms.expand(conf);
@@ -150,7 +159,17 @@ pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
     info!("after alias expansion: {expd:?}");
 
     let count = obj.count.unwrap_or(if obj.all { u32::MAX } else { 1 });
-    let ss = search(expd, obj.strict, count)?;
+    let ss = search(
+        expd,
+        obj.strict,
+        count,
+        obj.skip,
+        if obj.no_cache {
+            obj.no_cache
+        } else {
+            skip_cache
+        },
+    )?;
     for s in ss {
         println!("{s}");
         if obj.tree {

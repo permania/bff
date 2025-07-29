@@ -48,11 +48,12 @@ pub fn read_cache_file() -> Result<FileTree, error::BFFError> {
     Ok(decoded)
 }
 
-pub fn get_file_tree() -> Result<FileTree, error::BFFError> {
+pub fn get_file_tree(skip_hidden_dirs: bool) -> Result<FileTree, error::BFFError> {
     info!("building file tree");
 
     Ok(FileTree {
         files: WalkDir::new(".")
+            .skip_hidden(!skip_hidden_dirs)
             .into_iter()
             .filter_map(|entry| {
                 let entry = entry.ok()?;

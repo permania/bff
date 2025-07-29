@@ -9,7 +9,7 @@ use cli::error::BFFError;
 use cli::{
     arg_parser::{
         BFFArgs,
-        BFFCommands::{Clean, Search, Ui},
+        BFFCommands::{Clean, Search},
     },
     error::BFFError::NoConfig,
 };
@@ -44,11 +44,12 @@ fn run() -> Result<(), BFFError> {
     info!("using config: {conf:?}");
 
     match args.cmd {
-        Search(obj) => run_search(obj, conf)?,
+        Search(obj) => {
+            let skip = obj.skip.clone();
+            run_search(obj, conf, if skip { true } else { false })?;
+        }
 
         Clean => clean()?,
-
-        Ui => {}
     }
     Ok(())
 }
