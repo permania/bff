@@ -17,7 +17,6 @@ pub(crate) struct FileTree {
     pub files: Box<[String]>,
 }
 
-// TODO: add feature for mincache and real cache
 pub fn write_cache_file(
     checksum: &str,
     file_tree: &FileTree,
@@ -34,7 +33,6 @@ pub fn write_cache_file(
     Ok(())
 }
 
-// TODO: add feature for mincache and real cache
 pub fn read_cache_file() -> Result<FileTree, error::BFFError> {
     info!("reading from cache file");
 
