@@ -47,7 +47,7 @@ pub struct SearchArgs {
 
     /// Disable skipping hidden directories (can decrease indexing time drastically)
     #[clap(short = 'S', long)]
-    pub skip: bool,
+    pub show_hidden: bool,
 
     /// Skip writing the cache file, good for not cluttering directories
     #[clap(short = 'C', long)]

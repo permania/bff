@@ -88,7 +88,6 @@ dependencies = [
  "main_error",
  "once_cell",
  "rand",
- "regex",
  "rmp",
  "rmp-serde",
  "serde",

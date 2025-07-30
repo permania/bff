@@ -45,8 +45,7 @@ fn run() -> Result<(), BFFError> {
 
     match args.cmd {
         Search(obj) => {
-            let skip = obj.skip.clone();
-            run_search(obj, conf, if skip { true } else { false })?;
+            run_search(obj, conf)?;
         }
 
         Clean => clean()?,

@@ -15,7 +15,7 @@ pub fn search(
     query: Vec<String>,
     strict: bool,
     count: u32,
-    skip_hidden: bool,
+    show_hidden: bool,
     skip_cache: bool,
 ) -> Result<Vec<String>, BFFError> {
     info!(
@@ -31,14 +31,13 @@ pub fn search(
     }
 
     let sum = checksum::gen_checksum()?;
-    let old = checksum::read_checksum()?;
 
-    let tree = if !checksum::check_checksum(&sum, &old) {
+    let tree = if !checksum::check_cache(&sum, !show_hidden)? {
         info!("cache is out of date");
-        let tree = cache::get_file_tree(skip_hidden)?;
-        info!("file tree changed, writing cache file");
+        let tree = cache::get_file_tree(show_hidden)?;
         if !skip_cache {
-            write_cache_file(&sum, &tree)?
+            info!("file tree changed, writing cache file");
+            write_cache_file(&sum, &tree, !show_hidden)?
         };
         tree
     } else {
@@ -150,7 +149,7 @@ pub fn largest_matching_subset_size(test: &str, query: &[String]) -> Result<usiz
     Ok(0)
 }
 
-pub fn run_search(obj: SearchArgs, conf: TreeConfig, skip_cache: bool) -> Result<(), BFFError> {
+pub fn run_search(obj: SearchArgs, conf: TreeConfig) -> Result<(), BFFError> {
     info!("searching for files");
 
     let expd = obj.terms.expand(conf);
@@ -159,17 +158,7 @@ pub fn run_search(obj: SearchArgs, conf: TreeConfig, skip_cache: bool) -> Result
     info!("after alias expansion: {expd:?}");
 
     let count = obj.count.unwrap_or(if obj.all { u32::MAX } else { 1 });
-    let ss = search(
-        expd,
-        obj.strict,
-        count,
-        obj.skip,
-        if obj.no_cache {
-            obj.no_cache
-        } else {
-            skip_cache
-        },
-    )?;
+    let ss = search(expd, obj.strict, count, obj.show_hidden, obj.no_cache)?;
     for s in ss {
         println!("{s}");
         if obj.tree {

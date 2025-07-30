@@ -13,15 +13,20 @@ use crate::{cli::error, config::schema};
 pub const CACHE_FILE: &str = ".cache.bff";
 
 #[derive(Default, Serialize, Deserialize, Debug)]
-pub struct FileTree {
+pub(crate) struct FileTree {
     pub files: Box<[String]>,
 }
 
-pub fn write_cache_file(checksum: &str, file_tree: &FileTree) -> Result<(), error::BFFError> {
+// TODO: add feature for mincache and real cache
+pub fn write_cache_file(
+    checksum: &str,
+    file_tree: &FileTree,
+    mincache: bool,
+) -> Result<(), error::BFFError> {
     info!("writing to cache file");
 
     let mut file = File::create(CACHE_FILE)?;
-    writeln!(file, "{checksum}\n-")?;
+    writeln!(file, "{checksum}\n{}", if mincache { "-" } else { "+" })?;
 
     let buf = encode::to_vec(&file_tree)?;
     file.write_all(&buf)?;
@@ -29,6 +34,7 @@ pub fn write_cache_file(checksum: &str, file_tree: &FileTree) -> Result<(), erro
     Ok(())
 }
 
+// TODO: add feature for mincache and real cache
 pub fn read_cache_file() -> Result<FileTree, error::BFFError> {
     info!("reading from cache file");
 
@@ -48,12 +54,12 @@ pub fn read_cache_file() -> Result<FileTree, error::BFFError> {
     Ok(decoded)
 }
 
-pub fn get_file_tree(skip_hidden_dirs: bool) -> Result<FileTree, error::BFFError> {
+pub fn get_file_tree(show_hidden_dirs: bool) -> Result<FileTree, error::BFFError> {
     info!("building file tree");
 
     Ok(FileTree {
         files: WalkDir::new(".")
-            .skip_hidden(!skip_hidden_dirs)
+            .skip_hidden(!show_hidden_dirs)
             .into_iter()
             .filter_map(|entry| {
                 let entry = entry.ok()?;
