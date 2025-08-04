@@ -1,0 +1,196 @@
+#+title: bff 0.7.3
+
+* Find your files through your blurry memory!
+~bff~ (Blurry File Finder) is an alternative to ~find~ or ~fd~.
+Traditional file finders can be too strict when you're trying to find files you barely remember.
+~bff~ aims to fix that by finding files with less strict requirements.
+
+** Building
+To install simply run:
+#+begin_src shell
+cargo install --git https://github.com/permania/bff.git
+#+end_src
+
+** Usage 
+To view the available commands, simply run:
+#+begin_src shell
+bff -h
+#+end_src
+This will show you your options.
+
+To search for file(s) using ~bff~, use the ~search~ subcommand:
+#+begin_src shell
+bff search ping
+#+end_src
+You can add as many keywords as you want:
+#+begin_src shell
+bff search ping pong bing boo bar baz zip
+#+end_src
+
+By default, ~bff~ will create ~.cache.bff~ in the directory it's executed in, this can speed up future searches significantly:
+#+begin_src shell
+$ time bff search -S bff src main
+./Git/bff/src/main.rs
+bff search -S bff src main  2.25s user 3.38s system 446% cpu 1.259 total
+
+$ time bff search -S bff src main
+./Git/bff/src/main.rs
+bff search -S bff src main  0.20s user 0.12s system 99% cpu 0.319 total
+#+end_src
+Using the cache made the search 1025% faster!
+
+If you prefer to not generate the cache file, use the ~-C~ flag.
+#+begin_src shell
+bff search -C ping
+#+end_src
+This is useful if you're in a directory that you don't want to clutter with hidden files.
+
+If you want to clear the cache file (and the config file, more on that later) from the current working directory use the ~clean~ subcommand:
+#+begin_src shell
+bff clean
+#+end_src
+
+By default, ~bff~ skips hidden files when searching to increase speed, to include hidden files, use the ~-S~ flag, or ~--show-hidden~:
+#+begin_src shell
+$ bff search hidden
+Error: No search result found
+$ bff search -S hidden
+./.hidden
+#+end_src
+Note that the cache file will reflect the most recent search type used. So the first search of a new type will need to rebuild the cache.
+
+By default, ~bff~ will only show 1 search result, to show multiple search results, use ~-c N~ or ~--count N~:
+#+begin_src shell
+$ bff search visible
+./visible1
+$ bff search -c 2 visible
+./visible1
+./visible
+$ bff search -c 3 visible
+./visible1
+./visible
+./visible2
+#+end_src
+If ~-c~ is higher than the number of matches, all available results will be shown.
+
+If you want to see all results, use the ~-a~ or ~--all~ flag:
+#+begin_src shell
+$ bff search -a visible
+./visible1
+./visible
+./visible2
+#+end_src
+Note that if ~-c~ and ~-a~ are used together, ~-c~ is ignored.
+
+To see a tree view leading you to the search result, use the ~-t~ or ~--tree~ flag:
+#+begin_src shell
+$ bff search -t bff src main
+./Git/bff/src/main.rs
+└─ Git
+   └─ bff
+      └─ src
+         └─ main.rs
+#+end_src
+
+By default, ~bff~ will prioritize results that match all search terms, then show results that don't match all search terms, only failing if no results match any. To only allow results that match all search terms, use the ~-s~ or ~--strict~ flag:
+#+begin_src shell
+$ bff search bff src main ping
+./Git/bff/src/main.rs
+$ bff search -s bff src main ping
+Error: No search result found
+#+end_src
+~-s~ and ~-c~ are also compatible:
+#+begin_src shell
+$ bff search -sc 5 bff src main
+./Git/bff/src/main.rs
+./emacs-backups/!home!corn!Git!bff!src!main.rs~
+#+end_src
+
+You can compose any of these flags as you please:
+#+begin_src shell
+$ bff search -CSst everforest gtk
+./.themes/everforest-gtk/gtk-3.20/dist/gtk.css
+└─ .themes
+   └─ everforest-gtk
+      └─ gtk-3.20
+         └─ dist
+            └─ gtk.css
+#+end_src
+
+At any time, use the ~-v~ flag to see what ~bff~ is doing behind the scenes:
+#+begin_src shell
+bff -v [cmd]
+#+end_src
+
+** The Config File
+Config files for ~bff~ are directory specific, to configure ~bff~ for a directory, create ~.bff.toml~ in that directory.
+
+Currently, the only supported field is ~alias~.
+~alias~ can have any amount of key:value pairs. The key is the alias, the value is the expansion, for example:
+#+begin_src toml
+[alias]
+stubs = "checkstubs"
+#+end_src
+
+Then when using ~search~, the aliases will be expanded.
+#+begin_src shell
+$ bff search stubs # equivalent to `bff search checkstubs`
+#+end_src
+
+You can also make one term expand into multiple terms:
+#+begin_src toml
+[alias]
+multi = "multiple search terms"
+#+end_src
+
+#+begin_src shell
+$ bff search multi # equivalent to `bff search multiple search terms`
+#+end_src
+
+** Example
+Suppose you have a directory ~finance/~ containing bank statements and checkstubs, the shape of the file tree might be:
+#+begin_src shell
+finance
+├── payment
+│   ├── checkstubs
+│   │   ├── april
+│   │   │   └── filler.txt
+│   │   ├── february
+│   │   │   └── filler.txt
+│   │   ├── january
+│   │   │   └── filler.txt
+│   │   ├── march
+│   │   │   └── filler.txt
+│   │   └── may
+│   │       └── 05-14-25.pdf
+│   └── some_file
+└── statements
+    ├── 01-26.txt
+    ├── 01-27.txt
+    └── 01-28.txt
+#+end_src
+
+Your configuration might look like:
+#+begin_src toml
+[alias]
+stubs = "payment checkstubs"
+week1 = "7"
+week2 = "14"
+week3 = "21"
+week4 = "28"
+#+end_src
+
+By running:
+#+begin_src shell
+$ bff search -CS stubs week2 may
+#+end_src
+
+You'll get:
+#+begin_src shell
+./payment/checkstubs/may/05-14-25.pdf
+#+end_src
+
+Success!
+
+* Issues
+If you find a bug or want a feature, open an issue, I'll likely add it!
